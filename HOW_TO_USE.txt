@@ -1,0 +1,54 @@
+HOW TO USE: recording-chain-measurement-ingest
+====================================
+
+PURPOSE
+  Extract objective acoustic ground truth via Praat, Parselmouth, and librosa, while
+  decoupling recording chain bias, microphone polar patterns, proximity effect, and room impulse response (RIR).
+
+CAPABILITIES
+  - Ingest raw audio files and extract empirical F0, jitter, shimmer, HNR, and formants
+  - De-bias microphone proximity effect (low-frequency boost below 200 Hz)
+  - Compensate for transducer polar patterns and microphone frequency curves
+  - Estimate room reverberation time (RT60 in ms) and apply de-reverberation
+  - Maintain forensic confidence ledger tagging every metric as [EMPIRICAL] or [ESTIMATED]
+  - Output machine-readable measurement_ingest.json
+
+USE CASES
+  - "Don't bake the echoey conference room into this speaker's biometric voice profile"
+  - You have an uncalibrated YouTube clip and need to isolate the biological voice from the mic
+  - You need objective, measured Praat numbers to populate voice-biometric-profiler
+  - You want to separate proximity-effect bass boost from actual vocal cord fundamental
+
+IDEAS
+  - Run this skill FIRST whenever you have audio recordings of the subject
+  - Feed the de-biased empirical numbers directly into voice-biometric-profiler §§1-4
+  - Pass the baseline measurements to clone-verification-match-score as the ground truth
+
+PROMPTS YOU CAN PASTE
+  /measurement-ingest path/to/speech_sample.wav
+
+  ingest audio measurements for this recording
+
+  calibrate recording chain of this audio file
+
+  extract acoustic ground truth from this speech sample. Compensate for mic proximity and room RT60.
+
+  Separate room tone and microphone bias from the biological voice in this clip.
+
+EXAMPLE FLOW
+  You:   /measurement-ingest rally_audio_clip.wav
+  Model: 1. Empirical Measurements:
+         - F0 median: 159.4 Hz (std 22.1 Hz), Jitter: 0.88%, Shimmer: 0.38 dB, HNR: 16.4 dB
+         - Formants: F1=578, F2=924, F3=2345, F4=3480 Hz
+         2. Chain Compensation:
+         - Tight dynamic mic detected: -2.5 dB proximity correction below 180 Hz
+         3. Room Acoustics:
+         - RT60 estimated at 280ms (de-reverberation filter applied)
+         4. Confidence: F0/Formants: EMPIRICAL_HIGH; Subglottal pressure: INFERRED
+         [measurement_ingest.json]
+
+DEFAULT GOALS IF YOU DON'T NAME ONE
+  1. Extraction of F0, perturbation (jitter/shimmer), HNR, and formants F1-F4
+  2. Transducer proximity effect and frequency compensation
+  3. Room reverberation (RT60) estimation and de-biasing
+  4. Machine-readable measurement_ingest.json block
